@@ -1,44 +1,60 @@
-# ASP.NET
-# Build and test ASP.NET projects.
-# Add steps that publish symbols, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
 
 trigger:
 - master
 
 pool:
-  vmImage: 'windows-latest'
-
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  vmImage: 'ubuntu-latest'
 
 steps:
-- task: NuGetToolInstaller@1
+- task: Maven@3
+  displayName: Build with Maven
+  inputs:
+    mavenPomFile: 'pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'package'
 
-- task: NuGetCommand@2
+- task: Veracode@2
+  displayName: Veracode Static Scan 
   inputs:
-    restoreSolution: '$(solution)'
-
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-- task: Veracode@3
-  inputs:
-    ConnectionDetailsSelection: 'Credentials'
-    apiId: '47ccfe53d2d2d9c6fa34b78e7f8ee834'
-    apiKey: 'a81e86ca4133e3467967b0590b2a496d55b18fd06904f0371c8ab7ce7d4c2db2b39f0a3f552feb1a6fc9ba5a1f5285d4f150d11ffaa1684598d69227dc9276c3'
-    veracodeAppProfile: 'AzureDevOps'
+    ConnectionDetailsSelection: 'Endpoint'
+    AnalysisService: 'VeracodeDemoJava'
+    veracodeAppProfile: 'AzureDevOps-VeraDemoJava'
     version: '$(build.buildNumber)'
-    filepath: '$(build.artifactstagingdirectory)'
-    sandboxName: 'Daily-Build2'
-    createSandBox: true
-    maximumWaitTime: '360'
-- task: VSTest@2
+    filepath: '/home/vsts/work/1/s/target/verademo.war'
+    createProfile: false
+    scanStatusCheckInterval: '60'
+    importResults: true
+    failBuildOnPolicyFail: false
+
+- task: Veracode Flaw Importer@2
+  displayName: Veracode Flaw Import
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    ConnectionDetailsSelection: 'Endpoint'
+    AnalysisService: 'VeracodeDemoJava'
+    veracodeAppProfile: 'AzureDevOps-VeraDemoJava'
+    sandboxName: 
+    importType: 'All Unmitigated Flaws Violating Policy'
+    workItemType: 'Issue'
+    area: '$(system.teamProject)'
+    addCustomTag: 'Veracode'
+    flawImportLimit: '1000'
+
+- task: Bash@3
+  displayName: Veracode SCA scan
+  inputs:
+    targetType: 'inline'
+    script: |
+      export SRCCLR_SCM_URI=https://dev.azure.com/cpollock/VeraDemoJava
+      export SRCCLR_SCM_REF_TYPE=branch
+      export SRCCLR_API_TOKEN="$(SRCCLR_API_TOKEN)"
+      curl -sSL https://download.sourceclear.com/ci.sh | bash -s -- scan --skip-compile --update-advisor
