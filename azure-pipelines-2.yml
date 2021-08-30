@@ -27,12 +27,16 @@ steps:
     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-
-- task: VSTest@2
+- task: Veracode@3
   inputs:
-      AnalysisService: 'AzureDevOps'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    ConnectionDetailsSelection: 'Endpoint'
+    AnalysisService: 'Veracode'
+    veracodeAppProfile: 'AzureDevOps'
+    version: '$(build.buildNumber)'
+    filepath: '$(build.artifactstagingdirectory)'
+    sandboxName: 'DevOps-Test'
+    createSandBox: true
+    maximumWaitTime: '360'
 
 
 - task: PowerShell@2
