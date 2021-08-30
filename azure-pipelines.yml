@@ -27,7 +27,17 @@ steps:
     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-
+- task: Veracode@3
+  inputs:
+    ConnectionDetailsSelection: 'Credentials'
+    apiId: '47ccfe53d2d2d9c6fa34b78e7f8ee834'
+    apiKey: 'a81e86ca4133e3467967b0590b2a496d55b18fd06904f0371c8ab7ce7d4c2db2b39f0a3f552feb1a6fc9ba5a1f5285d4f150d11ffaa1684598d69227dc9276c3'
+    veracodeAppProfile: 'AzureDevOps'
+    version: '$(build.buildNumber)'
+    filepath: '$(build.artifactstagingdirectory)'
+    sandboxName: 'Daily-Build2'
+    createSandBox: true
+    maximumWaitTime: '360'
 - task: VSTest@2
   inputs:
     platform: '$(buildPlatform)'
