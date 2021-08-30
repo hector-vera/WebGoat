@@ -32,17 +32,6 @@ steps:
     filepath: '$(build.artifactstagingdirectory)'
     maximumWaitTime: '360'
 
-- task: Veracode Flaw Importer@2
-  displayName: Veracode Flaw Import
-  inputs:
-    ConnectionDetailsSelection: 'Endpoint'
-    veracodeAppProfile: 'AzureDevOps'
-    sandboxName: 
-    importType: 'All Unmitigated Flaws Violating Policy'
-    workItemType: 'Issue'
-    area: '$(system.teamProject)'
-    addCustomTag: 'Veracode'
-    flawImportLimit: '1000'
 
 - task: Bash@3
   displayName: Veracode SCA scan
