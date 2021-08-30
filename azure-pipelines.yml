@@ -23,25 +23,20 @@ steps:
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
 
-- task: Veracode@2
-  displayName: Veracode Static Scan 
+- task: Veracode@3
   inputs:
     ConnectionDetailsSelection: 'Endpoint'
-    AnalysisService: 'VeracodeDemoJava'
-    veracodeAppProfile: 'AzureDevOps-VeraDemoJava'
+    AnalysisService: 'Veracode'
+    veracodeAppProfile: '$(system.teamProject)'
     version: '$(build.buildNumber)'
-    filepath: '/home/vsts/work/1/s/target/verademo.war'
-    createProfile: false
-    scanStatusCheckInterval: '60'
-    importResults: true
-    failBuildOnPolicyFail: false
+    filepath: '$(build.artifactstagingdirectory)'
+    maximumWaitTime: '360'
 
 - task: Veracode Flaw Importer@2
   displayName: Veracode Flaw Import
   inputs:
     ConnectionDetailsSelection: 'Endpoint'
-    AnalysisService: 'VeracodeDemoJava'
-    veracodeAppProfile: 'AzureDevOps-VeraDemoJava'
+    veracodeAppProfile: 'AzureDevOps'
     sandboxName: 
     importType: 'All Unmitigated Flaws Violating Policy'
     workItemType: 'Issue'
