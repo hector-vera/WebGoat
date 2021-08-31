@@ -37,13 +37,3 @@ steps:
     sandboxName: 'DevOps-Test'
     createSandBox: true
     maximumWaitTime: '360'
-
-
-- task: PowerShell@2
-  displayName: Veracode Software Composition Analysis OSS check
-  inputs:
-    targetType: 'inline'
-    script: |
-      $Env:SRCCLR_API_TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjI5NzM5LCJleHAiOjE2MzAzNzI1MjcsImF1dGhvcml0aWVzIjoiQUdFTlQiLCJqdGkiOiJmNjM2MjAyMS1mMDRhLTQ1MDUtYmI2Ni1hMzM2ZDY5MGUzOGIiLCJjbGllbnRfaWQiOiIiLCJzY29wZSI6W119.XbqML1i6Vo1yoiq-lNX236lrtBUC210qkNQ_pCCsjBQgNPWRot0rGNInQB2sUjbvkO3U3-7hgdN9W7MSRYPK5SVremQasRrY_s5MUbkONxMfWcgqVt9lM1pvGMNCWAvijWZSH6TUCd_9Jvvs16cxaLQRzTYtbxzU0owGsrE9Qas"      Set-ExecutionPolicy AllSigned -Scope Process -Force
-      iex ((New-Object System.Net.WebClient).DownloadString('https://download.srcclr.com/ci.ps1'))
-      srcclr scan --url https://github.com/srcclr/example-ruby
